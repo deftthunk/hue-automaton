@@ -127,3 +127,10 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# PLY temp files
+parsetab.py
+parser.out
+
+# Other temp files
+out.txt

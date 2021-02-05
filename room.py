@@ -107,10 +107,11 @@ class Room:
 
 
   def Get_Light_Attribute(self, light, attribute):
-  '''
+    '''
+    asdf
+    '''
+    l = self.Get_Light(light)
 
-  '''
-  l = self.Get_Light(light)
 
   
 

@@ -1,0 +1,18 @@
+## home ingress
+
+## if an exterior door opens AND it's my bedtime AND confirm the house lights are off, 
+## THEN switch the house lights to a "special" mode
+
+IF sensor.front_door.motion = true THEN
+  IF event.bedtime.status = true THEN
+    IF zone.house.level = 0 THEN
+      zone.house.scene = intruder
+    END
+  END
+ELSEIF sensor.garage_door_interior.motion = true THEN
+  IF event.bedtime.status = true THEN
+    IF zone.house.level = 0 THEN
+      zone.house.scene = intruder
+    END
+  END
+END

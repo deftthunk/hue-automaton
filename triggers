@@ -1,0 +1,21 @@
+do something when...
+
+- everyone leaves the house
+  track via sensors and smart phone WiFi MAC address
+- react differently if sensors are tripped while no smart phone signals detected
+- the sun rises or sets
+  add a time offset to calculated sun rise/set
+- it's a federal holiday during the work week
+- it's the night before a federal holiday on a work week
+  anticipating staying up later than normal on a work day
+- it's bedtime or wake-up time
+- a sensor is triggered after bedtime
+  if sensor-suite detects movement originating away from bedrooms, act a certain way (ie. night light)
+  if sensor-suite detects movement near home ingress points, act a different way
+- people are on vacation (configured for vacation mode)
+  randomly turn lights on and off in house to simulate presence during normal hours
+- power restored after a blackout
+- a sensor hasn't been triggered in a certain amount of time
+- time of day
+- weekday or weekend
+- a setting has been overridden by an external source

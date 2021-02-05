@@ -1,0 +1,35 @@
+## grammar listing
+
+LIGHT
+.level (int)
+
+ROOM
+.LIGHT
+.scene (string)
+.level (int)
+
+ZONE
+.ROOM
+.LIGHT
+.scene (string)
+.level (int)
+
+SENSOR
+.motion (bool)
+.daylight (bool?)
+.temp (float)
+
+TIME
+.wait (int seconds)
+.within (int seconds)
+.now (string hh:mm:ss)
+.sunrise (bool)
+.sunset (bool)
+
+DATE
+.today (string yyyy:mm:dd)
+.daydate (int)
+.dayofweek (string)
+
+EVENT
+.status (bool?)

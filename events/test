@@ -1,0 +1,6 @@
+IF time.now = 21:30 THEN
+  IF room.den.level = 50 THEN
+    room.den.level = 80
+    STATUS = true
+  END
+END

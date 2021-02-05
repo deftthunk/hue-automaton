@@ -1,2 +1,6 @@
-# hue-automaton
+# huematica
 Phillips HUE light control automation
+
+## Work-In-Progress
+
+
