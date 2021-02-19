@@ -1,15 +1,27 @@
 import ply.yacc as yacc
 import ply.lex as lex
-from config_lexer import *
-import sys
+from event_lexer import *
+from libhuematica import *
+import sys, os
+import os.path
+
+def p_definition(p):
+    '''
+    definition  : definition head
+                | head
+    '''
+    try: p[0] = (p[1], p[2])
+    except: p[0] = p[1]
 
 
 def p_head(p):
     '''
     head        : IF expression THEN head END
                 | IF expression THEN expr_list END
+                | IF expression THEN expr_list head END
     '''
-    p[0] = (p[2], p[4])
+    try: p[0] = (p[1], p[2], p[3], ("FLAG", p[4]), p[5], p[6])
+    except: p[0] = (p[1], p[2], p[3], p[4], p[5])
 
 
 def p_expr_list(p):
@@ -18,7 +30,7 @@ def p_expr_list(p):
                 | expression
     '''
     try: p[0] = (p[1], p[2])
-    except: p[0] = p[1]
+    except: p[0] = ("FLAG", p[1])
 
 
 def p_expression(p):
@@ -26,8 +38,13 @@ def p_expression(p):
     expression  : OBJECT symbol rvalue
                 | STATUS symbol rvalue
     '''
-    p[0] = (p[1], p[2], p[3])
-
+    if p[-1] == "IF":
+        if p[2] == "=":
+            p[2] = "=="
+        p[0] = Test(p[1], p[2], p[3])
+    else:
+        p[0] = Assignment(p[1], p[2], p[3])
+    
 
 def p_symbol(p):
     '''
@@ -61,6 +78,28 @@ def p_error(token):
         print('Unexpected end of input') 
 
 
+def Parse(files=[]):
+    lexer = lex.lex()
+    parser = yacc.yacc()
+    events = {}
+
+    if files == []:
+        for f in os.listdir("events"):
+            path = os.path.join("events", f)
+            if os.path.isfile(path):
+                files.append(path)
+            
+    for event in files:
+        with open(event, "r") as fh:
+            output = fh.readlines()
+            script = ''.join(output)
+            events[event] = parser.parse(script)
+            #events.append(parser.parse(script))
+   
+    return events
+
+
+
 if __name__ == "__main__":
     lexer = lex.lex()
     parser = yacc.yacc()
@@ -70,5 +109,7 @@ if __name__ == "__main__":
         data += line
     
     ret = parser.parse(data)
+    #print(dir(parser))
     #ret = parser.parse(data, debug=1)
     print(ret)
+

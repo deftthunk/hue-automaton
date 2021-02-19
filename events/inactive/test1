@@ -1,0 +1,3 @@
+IF time.now = 21:00 THEN
+    living_room.level = 80
+END

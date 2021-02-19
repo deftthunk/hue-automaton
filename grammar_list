@@ -7,12 +7,7 @@ ROOM
 .LIGHT
 .scene (string)
 .level (int)
-
-ZONE
-.ROOM
-.LIGHT
-.scene (string)
-.level (int)
+.colortemp (int)
 
 SENSOR
 .motion (bool)

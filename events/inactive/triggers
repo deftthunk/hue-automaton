@@ -19,3 +19,9 @@ do something when...
 - time of day
 - weekday or weekend
 - a setting has been overridden by an external source
+
+
+ideas:
+- allow sensors to have their tempteratur readouts modified in case they're off (maybe on object initialization?)
+- add grammar to support saving and restoring previous state
+- allow for global variables (maybe an initialization script/event?)

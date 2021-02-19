@@ -1,6 +1,3 @@
-IF time.now = 21:30 THEN
-  IF room.den.level = 50 THEN
-    room.den.level = 80
-    STATUS = true
-  END
+IF room.living_room.level = 70 THEN
+  light.living_tv_1.level = 90
 END

@@ -1,11 +1,15 @@
 IF time.now = 21:30 THEN
+  zone.stairs.scene = nighttime
+  another.test = haha
   IF date.dayofweek != [friday,saturday] THEN
     STATUS = true
-    zone.house.
+    zone.house.level = 0
   END
 END
+
 IF time.now = 22:30 THEN
   IF date.dayofweek != [sunday,monday,tuesday,wednesday,thursday] THEN
     STATUS = true
+    zone.house.level = 0
   END
 END

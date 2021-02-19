@@ -1,0 +1,46 @@
+Sensors:
+    - Inside Garage Door Sensor
+    - Stair 2 Sensor
+    - Stair 3 Sensor
+    - Hue motion sensor 1
+    - Hue motion sensor 2
+    - Hue motion sensor 3
+
+----------------------
+Rooms & Zones
+    - Den
+    - Lounge
+    - Living Room
+    - Bedroom
+    - Cinema
+    - Second Floor and Stairs
+    - Stairs
+    - Kitchen
+    - Custom group for $lights
+    - Garage
+    - Second Floor
+
+----------------------
+Lights
+    - Den Standing 1
+    - Den Desk 1
+    - Den Fancy 1
+    - Living Couch 1
+    - Lounge Standing 2
+    - Lounge Bookshelf 1
+    - Kitchen Standing Low
+    - Kitchen Standing High
+    - MB Bed Left
+    - Living Couch 2
+    - Lounge Candle 1
+    - Lounge Candle 2
+    - Living TV 1
+    - Living Standing 1
+    - Living Standing 2
+    - Stair 3
+    - Stairs 2
+    - MB Tree Low
+    - MB Tree Mid
+    - Stairs 1
+    - Stairs 4
+    - MB Tree High

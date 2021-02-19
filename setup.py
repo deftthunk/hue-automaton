@@ -2,111 +2,284 @@ import phue
 import sys
 import configparser
 import time
+import re
+import os.path
 from room import Room
 from sensor import Sensor
-from pprint import PrettyPrinter
+from event import Event
+from light import Light
+from libhuematica import *
+import event_parser
+import event
 
 
 def Read_Config():
-  config = configparser.ConfigParser()
-  ret = config.read("config.ini")
-  if ret == []:
-    print("unable to find 'config.ini', exiting")
-    sys.exit(1)
+    config = configparser.ConfigParser()
+    ret = config.read("config.ini")
+    if ret == []:
+        print("unable to find 'config.ini', exiting")
+        sys.exit(1)
 
-  return config
+    return config
 
 
 def Connect(config):
-  bridge_ip = config["settings"]["bridge"]
-  b = phue.Bridge(bridge_ip)
-  b.connect()
-  return b
+    bridge_ip = config["settings"]["bridge"]
+    b = phue.Bridge(bridge_ip)
+    b.connect()
+    return b
+
+
+def Build_Lights(b):
+    lights = {}
+    light_dict = b.get_light()
+
+    for i in light_dict.keys():
+        light_data = light_dict[i]
+        name = light_data["name"]
+
+        ## create new light object
+        new_light = Light(light_data, b)
+        lights[name] = new_light
+
+    return lights
 
 
 def Build_Rooms(b):
-  rooms = {}
-  groups = b.get_group()
-  lights = b.get_light_objects("id")
+    rooms = {}
+    groups = b.get_group()
+    lights = b.get_light_objects("id")
 
-  for i in groups.keys():
-    room_data = groups[i]
+    for i in groups.keys():
+        room_data = groups[i]
+        
+        '''
+        ## get room's light objects
+        light_data = {}
+        light_indexes = room_data["lights"]
 
-    ## get room's light objects
-    light_data = {}
-    light_indexes = room_data["lights"]
+        for j in light_indexes:
+            l_id = int(j)
+            light_data[lights[l_id].name] = lights[l_id]
+        '''
+        
+        ## create new room object
+        new_room = Room(room_data, b)
+        rooms[new_room.name] = new_room
 
-    for j in light_indexes:
-      l_id = int(j)
-      light_data[lights[l_id].name] = lights[l_id]
-
-    ## create new room object
-    new_room = Room(room_data, light_data, b)
-    rooms[new_room.name] = new_room
-
-  return rooms
+    return rooms
 
 
 def Build_Sensors(b):
-  sensors = {}
-  raw_sensors = b.get_sensor()
-  
-  for key in raw_sensors.keys():
-    raw_data = raw_sensors[key]
-    if raw_data.get("type").find("ZLLPresence") != -1:
-      uuid = raw_data["uniqueid"]
-      name = raw_data["name"]
-      
-      new_sensor = Sensor(name, uuid)
-      sensors[name] = new_sensor
+    sensors = {}
+    raw_sensors = b.get_sensor()
     
-  return sensors
+    for key in raw_sensors.keys():
+        raw_data = raw_sensors[key]
+        if raw_data.get("type").find("ZLLPresence") != -1:
+            uuid = raw_data["uniqueid"]
+            name = raw_data["name"]
+            
+            new_sensor = Sensor(name, uuid)
+            sensors[name] = new_sensor
+        
+    return sensors
 
 
-def start():
-  pp = PrettyPrinter()
-  config = Read_Config()
-  b = Connect(config)
+def Build_Events(d):
+    events = {}
+    ## class method; find and parses all user event files
+    event_configs = event_parser.Parse()
+    
 
-  sensors = Build_Sensors(b)
-  rooms = Build_Rooms(b)
-
-  for s in sensors.keys():
-    print("{} ({})".format(s, str(type(sensors[s]))))
-
-  for r in rooms.keys():
-    print("{} ({})".format(r, str(type(rooms[r]))))
-    for l in rooms[r].Get_Lights():
-      print("\t{}".format(str(l)))
+    for file_path, pseudo_code in event_configs.items():
+        file_name = os.path.split(file_path)[1]
+        real_code = event.Convert_Pseudo_Code(pseudo_code, d)
+        print("name: ", file_name)
+        print(real_code)
 
 
 
-start()
+    """
+    def format_event_string(e):
+        '''
+        turn the user-generated event files into real code by: 
+        - removing non-Python syntax
+        - correcting spacing issues
+        - resolving user-generated global variables
+        '''
+        nonlocal indent_size
+        indent = " " * indent_size
+
+        for token in e:
+            if type(token) == tuple:
+                format_event_string(token)
+            elif isinstance(token, Expression):
+                blurb_array.append(" ".join([token.left, token.op, token.right]))
+                if isinstance(token, Assignment):
+                    ## since this is a standalone expression, we need indenting and newline
+                    blurb_array.insert(-1, indent)
+                    blurb_array.append("\n")
+                else:
+                    blurb_array.append(":\n")
+            elif token == "IF":
+                blurb_array.append(indent)
+                blurb_array.append("if ")
+            elif token == "THEN":
+                indent_size += 4
+                pass
+            elif token == "END":
+                indent_size -= 4
+            elif token == "FLAG":
+                '''artifically created a tuple in cases where user writes an assignemnt, 
+                followed by a nested if-statement. this flag gets dropped here and the 
+                tuple processed so that spacing lines up
+                '''
+                pass
+            else:
+                raise Exception("Found unexpected token")
+                
+
+    for e in event_configs:
+        blurb = """"""
+        blurb_array = []
+        indent_size = 4
+
+        event.Format_User_Code(e)
+        blurb = ''.join(blurb_array)
+    """
+        
+    return events
+
+
+def Normalize_Name(name):
+    name = re.sub('[^0-9a-zA-Z]+', '_', name)
+    return name.lower()
+
+
+def Generate_Name_List(d):
+    with open("AUTOGENERATED_User-HUE-Devices.txt", "w") as fh:
+        fh.write("Sensors:\n")
+        s_names = d.obj_lookup["sensor"]
+        for sensor in d.Get_Sensor_Names():
+            fh.write("    - {}\n".format(sensor))
+            normalized = Normalize_Name(sensor)
+            print("DEBUG: normalized name: ", normalized)
+            if s_names.get(normalized) is None:
+                s_names[normalized] = d.sensors[sensor]
+            else:
+                print("ERROR: same name used for two sensors")
+
+        fh.write("\n----------------------\n")
+        fh.write("Rooms & Zones\n")
+        r_names = d.obj_lookup["room"]
+        for room in d.Get_Room_Names():
+            fh.write("    - {}\n".format(room))
+            normalized = Normalize_Name(room)
+            print("DEBUG: normalized name: ", normalized)
+            if r_names.get(normalized) is None:
+                r_names[normalized] = d.rooms[room]
+            else:
+                print("ERROR: same name used for two rooms")
+        
+        fh.write("\n----------------------\n")
+        fh.write("Lights\n")
+        l_names = d.obj_lookup["light"]
+        for light in d.Get_Light_Names():
+            fh.write("    - {}\n".format(light))
+            normalized = Normalize_Name(light)
+            print("DEBUG: normalized name: ", normalized)
+            if l_names.get(normalized) is None:
+                l_names[normalized] = d.lights[light]
+            else:
+                print("ERROR: same name used for two lights")
+
+
+def test(d):
+    import pprint
+    pp = pprint.PrettyPrinter()
+    pp.pprint(d.obj_lookup)
+    #pp.pprint(d.api_lookup)
+
+
+
+def Setup():
+    config = Read_Config()
+    b = Connect(config)
+
+    sensors = Build_Sensors(b)
+    rooms = Build_Rooms(b)
+    lights = Build_Lights(b)
+
+    d = Directory(b, rooms, sensors, lights)
+ 
+    Generate_Name_List(d)
+    test(d)
+    events = Build_Events(d)
+    
+    return d
+
+
+
+
+if __name__ == "__main__":
+    from pprint import PrettyPrinter
+    
+    pp = PrettyPrinter()
+    config = Read_Config()
+    b = Connect(config)
+
+    sensors = Build_Sensors(b)
+    rooms = Build_Rooms(b)
+    lights = Build_lights(b)
+
+    d = Directory(b, rooms, sensors, lights)
+    Generate_Name_List(d)   
+    events = Build_Events(d)
+
+
+
+
+
+
+
+
 
 
 '''
-  def sensors():
-    sensors = Build_Sensors(b)
+    for s in sensors.keys():
+        print("{} ({})".format(s, str(type(sensors[s]))))
+
+    for r in rooms.keys():
+        print("{} ({})".format(r, str(type(rooms[r]))))
+        for l in rooms[r].Get_Lights():
+            print("\t{}".format(str(l)))
+'''
 
 
-  def rooms():
-    rooms = Build_Rooms(b)
+'''
+    def sensors():
+        sensors = Build_Sensors(b)
 
-    den = rooms["Den"]
-    print("Den: ", den.Is_Any_On())
-    print("number of lights: ", den.Get_Num_Lights())
-    bri = den.Get_Brightness()
-    print("bright: ", str(bri))
-  
-    from time import sleep
-    den.Set_Brightness(254)
-    sleep(2)
-    print("bri: ", str(den.Get_Brightness()))
-    sleep(1)
-    print("resetting...")
-    den.Set_Brightness(bri)
-    sleep(2)
-    print("bri: ", str(den.Get_Brightness()))
+
+    def rooms():
+        rooms = Build_Rooms(b)
+
+        den = rooms["Den"]
+        print("Den: ", den.Is_Any_On())
+        print("number of lights: ", den.Get_Num_Lights())
+        bri = den.Get_Brightness()
+        print("bright: ", str(bri))
+    
+        from time import sleep
+        den.Set_Brightness(254)
+        sleep(2)
+        print("bri: ", str(den.Get_Brightness()))
+        sleep(1)
+        print("resetting...")
+        den.Set_Brightness(bri)
+        sleep(2)
+        print("bri: ", str(den.Get_Brightness()))
 '''
 
 
