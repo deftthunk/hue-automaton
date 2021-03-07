@@ -42,8 +42,11 @@ def Convert_Pseudo_Code(e, d):
             print("real name: ", hue_obj.name)
             method = d.api_lookup[table][feature]
             print("method: ", method)
-            new_token = '.'.join([hue_obj, method])
+            new_token = '.'.join([str(hue_obj), str(method)])
             print("new token: ", new_token)
+            token.left = new_token
+
+            return token
             
              
         ## time or date
@@ -51,8 +54,6 @@ def Convert_Pseudo_Code(e, d):
             pass
         else:
             pass
-
-
 
 
     def format_code(e):
