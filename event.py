@@ -26,6 +26,9 @@ def Convert_Pseudo_Code(e, d):
 
 
     def decode_objects(token):
+        '''
+        convert strings such as 'room.den.level' into actual object methods
+        '''
         decode = []
         obj = token.left
         parts = obj.split('.')
@@ -42,7 +45,7 @@ def Convert_Pseudo_Code(e, d):
             print("real name: ", hue_obj.name)
             method = d.api_lookup[table][feature]
             print("method: ", method)
-            new_token = '.'.join([hue_obj, method])
+            new_token = '.'.join([str(hue_obj), str(method)])
             print("new token: ", new_token)
             
              

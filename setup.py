@@ -53,16 +53,6 @@ def Build_Rooms(b):
     for i in groups.keys():
         room_data = groups[i]
         
-        '''
-        ## get room's light objects
-        light_data = {}
-        light_indexes = room_data["lights"]
-
-        for j in light_indexes:
-            l_id = int(j)
-            light_data[lights[l_id].name] = lights[l_id]
-        '''
-        
         ## create new room object
         new_room = Room(room_data, b)
         rooms[new_room.name] = new_room
@@ -99,56 +89,7 @@ def Build_Events(d):
         print(real_code)
 
 
-
-    """
-    def format_event_string(e):
-        '''
-        turn the user-generated event files into real code by: 
-        - removing non-Python syntax
-        - correcting spacing issues
-        - resolving user-generated global variables
-        '''
-        nonlocal indent_size
-        indent = " " * indent_size
-
-        for token in e:
-            if type(token) == tuple:
-                format_event_string(token)
-            elif isinstance(token, Expression):
-                blurb_array.append(" ".join([token.left, token.op, token.right]))
-                if isinstance(token, Assignment):
-                    ## since this is a standalone expression, we need indenting and newline
-                    blurb_array.insert(-1, indent)
-                    blurb_array.append("\n")
-                else:
-                    blurb_array.append(":\n")
-            elif token == "IF":
-                blurb_array.append(indent)
-                blurb_array.append("if ")
-            elif token == "THEN":
-                indent_size += 4
-                pass
-            elif token == "END":
-                indent_size -= 4
-            elif token == "FLAG":
-                '''artifically created a tuple in cases where user writes an assignemnt, 
-                followed by a nested if-statement. this flag gets dropped here and the 
-                tuple processed so that spacing lines up
-                '''
-                pass
-            else:
-                raise Exception("Found unexpected token")
-                
-
-    for e in event_configs:
-        blurb = """"""
-        blurb_array = []
-        indent_size = 4
-
-        event.Format_User_Code(e)
-        blurb = ''.join(blurb_array)
-    """
-        
+       
     return events
 
 
