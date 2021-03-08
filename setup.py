@@ -85,8 +85,13 @@ def Build_Events(d):
     for file_path, pseudo_code in event_configs.items():
         file_name = os.path.split(file_path)[1]
         real_code = event.Convert_Pseudo_Code(pseudo_code, d)
+        ## if None, event/rule failed formatting or other sanity check
+        if real_code = None:
+            print("Failed during processing of event {}".format(file_name))
         print("name: ", file_name)
         print(real_code)
+        events[file_name] = event.Event
+        
 
     return events
 

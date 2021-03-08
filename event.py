@@ -25,12 +25,43 @@ def Convert_Pseudo_Code(e, d):
         return d.obj_lookup[table][name]
 
 
+    def check_value(value, operator, expected_type):
+        '''
+        Determine if the correct value type and operator was provided
+        '''
+        if type(value) == expected_type:
+            try:
+                eval(str(value operator value))
+                return True
+            except TypeError:
+                print("ERROR: invalid operator or value")
+                print(str(value operator value))
+                return False
+        else:
+            print("ERROR: Wrong value type")
+            print(str(value), " ", str(expected_type))
+            return False
+
+
+    def encode_token(obj, method, operator, value):
+        new_token = ""
+
+        
+
+        print("new token: ", new_token)
+        print()
+
+
+
+
     def decode_objects(token):
         '''
         convert strings such as 'room.den.level' into actual object methods
         '''
-        decode = []
         obj = token.left
+        operator = token.op
+        value = token.right
+
         parts = obj.split('.')
         ## ie. 'room', 'light', 'time'
         table = parts[0]
@@ -45,9 +76,14 @@ def Convert_Pseudo_Code(e, d):
             print("real name: ", hue_obj.name)
             method = d.api_lookup[table][feature]
             print("method: ", method)
-            new_token = '.'.join([str(hue_obj), str(method)])
-            print("new token: ", new_token)
-            token.left = new_token
+            
+            ## method example -> ('Brightness', <class 'int'>)
+            if check_value(value, operator, method[1]) == False:
+                return None
+
+            encode_token(hue_obj, method, operator, value)
+
+
 
             return token
             
@@ -57,6 +93,8 @@ def Convert_Pseudo_Code(e, d):
             pass
         else:
             pass
+
+
 
 
     def format_code(e):
@@ -75,6 +113,9 @@ def Convert_Pseudo_Code(e, d):
                 format_code(token)
             elif isinstance(token, Expression):
                 token = decode_objects(token)
+                ## pass failure up the chain to skip this badly written event/rule
+                if token = None:
+                    return None
                 blurb_array.append(" ".join([token.left, token.op, token.right]))
                 if isinstance(token, Assignment):
                     ## since this is a standalone expression, we need indenting and newline
